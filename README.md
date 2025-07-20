@@ -2,6 +2,8 @@
 
 A fully serverless URL shortener built with AWS Lambda, DynamoDB, and S3.
 
+<img width="1024" height="1024" alt="whiskersstack-logo" src="https://github.com/user-attachments/assets/8962d43f-77f4-4844-8ffa-f9774cf760bb" />
+
 ---
 
 ## 📊 Architecture Overview
@@ -88,6 +90,7 @@ This diagram shows how the Whiskers URL Shortener system works from user submiss
 
 <img width="1203" height="286" alt="Screenshot 2025-07-20 195246" src="https://github.com/user-attachments/assets/33b12b78-94b0-4e50-8797-1f962f6af00e" />
 <img width="1489" height="960" alt="Screenshot 2025-07-20 193754" src="https://github.com/user-attachments/assets/0fb909d3-a154-4ce0-8ade-7d82183b04a5" />
+<img width="520" height="65" alt="image" src="https://github.com/user-attachments/assets/52afe329-1fc4-458b-97e6-2d7698946f85" />
 
 
 ### 5. HTML Form Integration
@@ -160,12 +163,5 @@ def lambda_handler(event, context):
 
 ---
 
-## 🐾 Credits
+<img width="540" height="410" alt="image" src="https://github.com/user-attachments/assets/4a1a6b38-9ba9-459a-877f-f69f1becf503" />
 
-Built with whiskers and love by serverless enthusiasts.
-
----
-
-## 📄 License
-
-MIT
