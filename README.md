@@ -81,20 +81,8 @@ This diagram shows how the Whiskers URL Shortener system works from user submiss
 * Create a Lambda function
 
   * Runtime: **Python 3.12**
-  * Use an existing role with **DynamoDB read/write access**, or create one
-* Inside the function:
-
-  * Create `lambda_function.py` and paste the `main.py` code
-  * Create `helper.py` and paste the `helper.py` code
-* Set environment variable:
-
-  * `TABLE_NAME = WhiskersURL`
-
-### 4. Function URL
-
-* In your Lambda configuration, enable the **Function URL**
-
-  * Enable Function URL
+  * Use an existing role with **LabRole**
+  * Enable the **Function URL**
   * Set **Auth type** to `NONE`
   * Copy the URL (e.g. `https://xyz.lambda-url.us-east-1.on.aws/`)
 
@@ -114,42 +102,52 @@ Update your HTML form tag like so:
 
 ## 🐍 Lambda Code
 
+<img width="347" height="261" alt="image" src="https://github.com/user-attachments/assets/5a793d14-c80c-41ea-b4a3-d18ed90db3d3" />
+
 ### `lambda_function.py`
 
 ```python
 import json
+import boto3
 import os
 import random
 import string
-import boto3
-from helper import get_table
+
+TABLE_NAME = os.environ.get("TABLE_NAME", "WhiskersURL")
+dynamodb = boto3.resource("dynamodb")
+table = dynamodb.Table(TABLE_NAME)
 
 def lambda_handler(event, context):
-    body = json.loads(event["body"])
-    long_url = body.get("long_url")
-    if not long_url:
-        return {"statusCode": 400, "body": json.dumps("Missing long_url")}
+    # Handle CORS preflight request
+    if event["requestContext"]["http"]["method"] == "OPTIONS":
+        return {
+            "statusCode": 200,
+            "headers": cors_headers(),
+            "body": json.dumps({"message": "CORS preflight success"})
+        }
 
-    short_id = ''.join(random.choices(string.ascii_letters + string.digits, k=6))
-    table = get_table()
-    table.put_item(Item={"id": short_id, "long_url": long_url})
-
-    return {
-        "statusCode": 200,
-        "body": json.dumps({"short_url": f"{event['headers']['origin']}/{short_id}"})
-    }
+# Rest of the script...
 ```
 
-### `helper.py`
+### `WhiskersRedirect.py`
 
 ```python
+import json
 import boto3
 import os
 
-def get_table():
-    dynamodb = boto3.resource('dynamodb')
-    table_name = os.environ.get("TABLE_NAME")
-    return dynamodb.Table(table_name)
+dynamodb = boto3.resource("dynamodb")
+table_name = os.environ.get("TABLE_NAME", "WhiskersURL")
+table = dynamodb.Table(table_name)
+
+def lambda_handler(event, context):
+    raw_path = event.get("rawPath", "/")
+    short_id = raw_path.lstrip("/")
+
+    if not short_id:
+        return error_page(400, "Missing short code")
+
+# Rest of the script...
 ```
 
 ---
