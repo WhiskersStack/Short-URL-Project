@@ -121,20 +121,22 @@
                 return;
             }
 
-            const response = await fetch("https://your-api-id.execute-api.YOUR-REGION.amazonaws.com/shorten", {
+            const response = await fetch("https://r6hbncei5lwdxlkkb5wyvo6fc40qrong.lambda-url.us-west-2.on.aws/", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ url: input }),
+                body: JSON.stringify({ url: input })
             });
 
             const data = await response.json();
 
             if (response.ok) {
-                document.getElementById("short-url").innerHTML = `🔗 <a href="${input}" target="_blank">${data.shortUrl}</a>`;
+                document.getElementById("short-url").innerHTML =
+                    `🔗 <a href="${input}" target="_blank">${data.shortUrl}</a>`;
             } else {
                 alert(data.error || "Something went wrong.");
             }
         }
+
 
     </script>
 
