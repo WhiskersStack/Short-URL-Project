@@ -5,10 +5,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>WhiskersStack URL Shortener</title>
+
     <style>
+        /* ========== DARK THEME LAYOUT ========== */
         body {
             font-family: 'Segoe UI', sans-serif;
-            background-color: #1a1a1a;
+            background: #1a1a1a;
             color: #f0f0f0;
             display: flex;
             flex-direction: column;
@@ -19,6 +21,7 @@
             padding-top: 40px;
         }
 
+        /* ---------- Brand logo ---------- */
         .logo {
             width: 160px;
             height: auto;
@@ -30,11 +33,11 @@
 
             0%,
             100% {
-                transform: translateY(0);
+                transform: translateY(0)
             }
 
             50% {
-                transform: translateY(-6px);
+                transform: translateY(-6px)
             }
         }
 
@@ -46,43 +49,73 @@
         }
 
         p {
-            color: #cccccc;
+            color: #ccc;
             margin-bottom: 40px;
         }
 
+        /* ---------- Input field ---------- */
         input[type="url"] {
             width: 300px;
             padding: 12px 15px;
             font-size: 1rem;
             border: 1px solid #444;
             border-radius: 6px;
-            background-color: #2b2b2b;
+            background: #2b2b2b;
             color: #f0f0f0;
             outline: none;
         }
 
+        /* ---------- Button ---------- */
         button {
             margin-left: 12px;
             padding: 12px 20px;
             font-size: 1rem;
-            background-color: #ffcc00;
+            background: #ffcc00;
             color: #1a1a1a;
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            transition: 0.3s;
+            transition: background 0.3s;
         }
 
         button:hover {
-            background-color: #ffdb4d;
+            background: #ffdb4d;
         }
 
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ---------- Spinner ---------- */
+        .loader {
+            display: none;
+            /* shown only while loading */
+            margin-left: 12px;
+            border: 4px solid #444;
+            /* outer ring */
+            border-top: 4px solid #ffcc00;
+            /* accent colour */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        /* ---------- Output area ---------- */
         #short-url {
             margin-top: 30px;
             font-size: 1.2rem;
             color: #87ceeb;
         }
 
+        /* ---------- Footer ---------- */
         .footer {
             margin-top: auto;
             padding: 20px 0;
@@ -98,7 +131,6 @@
 
 <body>
 
-    <!-- Logo Image -->
     <img src="whiskersstack-logo.png" alt="WhiskersStack Logo" class="logo" />
 
     <h1>WhiskersStack</h1>
@@ -106,7 +138,9 @@
 
     <div>
         <input type="url" id="urlInput" placeholder="Paste your long URL here" />
-        <button onclick="shortenURL()">Shorten</button>
+        <button id="shortenBtn" onclick="shortenURL()">Shorten</button>
+        <!-- tiny spinner -->
+        <div id="loader" class="loader"></div>
     </div>
 
     <div id="short-url"></div>
@@ -115,31 +149,52 @@
 
     <script>
         async function shortenURL() {
-            const input = document.getElementById("urlInput").value;
-            if (!input.trim()) {
+            const inputEl = document.getElementById("urlInput");
+            const button = document.getElementById("shortenBtn");
+            const loader = document.getElementById("loader");
+            const outputEl = document.getElementById("short-url");
+            const longUrl = inputEl.value.trim();
+
+            if (!longUrl) {
                 alert("Please enter a URL!");
                 return;
             }
 
-            const response = await fetch("https://r6hbncei5lwdxlkkb5wyvo6fc40qrong.lambda-url.us-west-2.on.aws/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ url: input })
-            });
+            /* --- UI: start loading state --- */
+            button.disabled = true;
+            loader.style.display = "inline-block";
+            outputEl.textContent = "";   // clear previous result
 
-            const data = await response.json();
+            try {
+                const resp = await fetch(
+                    "https://mqdiderpf2effj7b7witmkoinm0zbkgk.lambda-url.us-west-2.on.aws/",
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ url: longUrl })
+                    }
+                );
+                const data = await resp.json();
 
-            if (response.ok) {
-                document.getElementById("short-url").innerHTML =
-                    `🔗 <a href="${input}" target="_blank">${data.shortUrl}</a>`;
-            } else {
-                alert(data.error || "Something went wrong.");
+                if (resp.ok) {
+                    /* ✅ Use the SHORT url for both href and label */
+                    outputEl.innerHTML =
+                        `🔗 <a href="${data.shortUrl}" target="_blank" rel="noopener noreferrer">${data.shortUrl}</a>`;
+                } else {
+                    alert(data.error || "Something went wrong.");
+                }
+            }
+            catch (err) {
+                console.error(err);
+                alert("Network error. Please try again.");
+            }
+            finally {
+                /* --- UI: end loading state --- */
+                button.disabled = false;
+                loader.style.display = "none";
             }
         }
-
-
     </script>
-
 </body>
 
 </html>

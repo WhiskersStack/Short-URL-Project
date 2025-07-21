@@ -1,52 +1,63 @@
 import json
 import boto3
-import os
+import logging
 import random
 import string
 
-TABLE_NAME = os.environ.get("TABLE_NAME", "WhiskersURL")
+TABLE_NAME = "WhiskersURL"   # hard-coded
+BASE_URL = "https://mqdiderpf2effj7b7witmkoinm0zbkgk.lambda-url.us-west-2.on.aws"
+
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table(TABLE_NAME)
 
-def lambda_handler(event, context):
-    # Handle CORS preflight request
-    if event["requestContext"]["http"]["method"] == "OPTIONS":
-        return {
-            "statusCode": 200,
-            "headers": cors_headers(),
-            "body": json.dumps({"message": "CORS preflight success"})
-        }
 
-    try:
+def lambda_handler(event, context):
+    # ---- Logging to see what arrives ----
+    logging.warning("EVENT=%s", json.dumps(event))
+
+    method = event["requestContext"]["http"]["method"]
+    path = event["rawPath"].lstrip("/")      # ''  or 'AbC123'
+
+    # === POST /  – create short link ==========================
+    if method == "POST":
         body = json.loads(event.get("body", "{}"))
         long_url = body.get("url", "")
-
         if not long_url.startswith("http"):
-            return respond(400, {"error": "Invalid URL"})
+            return _resp(400, {"error": "Invalid URL"})
 
-        short_id = ''.join(random.choices(string.ascii_letters + string.digits, k=6))
+        short_id = _gen_id()
+        table.put_item(Item={"id": short_id, "long_url": long_url})
 
-        table.put_item(Item={
-            "id": short_id,
-            "long_url": long_url
-        })
+        return _resp(200, {"shortUrl": f"{BASE_URL}/{short_id}"})
 
-        short_url = f"https://r6hbncei5lwdxlkkb5wyvo6fc40qrong.lambda-url.us-west-2.on.aws/{short_id}"
-        return respond(200, {"shortUrl": short_url})
+    # === GET /{id} – redirect ================================
+    if method == "GET" and path and path != "favicon.ico":
+        item = table.get_item(Key={"id": path}).get("Item")
+        if item:
+            return {
+                "statusCode": 302,
+                "headers": {"Location": item["long_url"]},
+                "body": ""
+            }
+        return _resp(404, {"error": "Not found"})
 
-    except Exception as e:
-        return respond(500, {"error": str(e)})
+    # === fallback ============================================
+    return _resp(405, {"error": "Method not allowed"})
 
-def respond(status, body):
+# ---------- helpers -----------------------------------------
+
+
+def _resp(code, body):
     return {
-        "statusCode": status,
-        "headers": cors_headers(),
+        "statusCode": code,
+        "headers": {               # REMOVE CORS HEADERS HERE
+            "Content-Type": "application/json"
+        },
         "body": json.dumps(body)
     }
 
-def cors_headers():
-    return {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "OPTIONS,POST",
-        "Access-Control-Allow-Headers": "Content-Type"
-    }
+# In the OPTIONS branch remove the CORS headers or delete the branch altogether
+
+
+def _gen_id(n=6):
+    return "".join(random.choices(string.ascii_letters + string.digits, k=n))
