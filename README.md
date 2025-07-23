@@ -31,6 +31,8 @@ Paste a long link, click **Shorten**, and get a tidy cat‑powered URL back! �
 
 ## 🛠️ Step‑by‑Step Setup (Console‑only)
 
+---
+
 1. ### **Create the DynamoDB Table**
 
    | Setting       | Value         |
@@ -40,7 +42,7 @@ Paste a long link, click **Shorten**, and get a tidy cat‑powered URL back! �
 
 <img width="978" height="407" alt="image" src="https://github.com/user-attachments/assets/2540629c-3da8-4086-a065-4e400cd80fa4" />
 
---
+---
 
 2. ### **Deploy the Lambda Function**
 
