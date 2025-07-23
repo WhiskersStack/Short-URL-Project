@@ -1,6 +1,7 @@
 # 🐱‍💻 WhiskersStack URL Shortener
 
 Paste a long link, click **Shorten**, and get a tidy cat‑powered URL back! 😸🔗
+<img width="1024" height="1024" alt="image" src="https://github.com/user-attachments/assets/e53fec5c-ae85-4d1b-acea-3333c4e4f518" />
 
 ---
 
