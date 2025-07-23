@@ -64,7 +64,7 @@ Paste a long link, click **Shorten**, and get a tidy cat‑powered URL back! �
 
    1. Create an **S3 bucket** with **public‑read** (static hosting) enabled and **ACLs turned ON**.
    2. Edit `WhiskersURL.html`: update the `fetch()` URL to your **`BASE_URL`**.
-   3. Upload HTML + logo PNG, and **Make them public by using ACLs**
+   3. Upload HTML + logo PNG, and **Make them public by using ACLs**.
       
 <img width="951" height="334" alt="image" src="https://github.com/user-attachments/assets/1946b83f-9273-4ad8-a955-da06178dc6eb" />
 <img width="524" height="469" alt="image" src="https://github.com/user-attachments/assets/7b6e738e-036c-4598-ba29-83ef17b93c6e" />
